@@ -1,0 +1,1045 @@
+#!/bin/bash
+
+SDIR=$HOME/files/tex-files/atomes/tutorials-site
+SITE_HOME=$SDIR/site
+title=
+texfile=
+mathjax=1
+katex=0
+HFILE=tutorials.html
+FFILE=$SITE_HOME/footnotes.html
+SLOG=$SITE_HOME/log
+FIGREF=$SITE_HOME/frefs
+FLOG=$SITE_HOME/flog
+TABREF=$SITE_HOME/trefs
+TLOG=$SITE_HOME/tlog
+
+if [ "$1" == "local" ]; then
+  HROOT="/"
+  HRT="\/"
+  HJR=""
+else
+  HROOT="/atomes-tuto/"
+  HRT="\/atomes-tuto\/"
+  HJR="\/atomes-tuto"
+fi
+
+function index_md {
+echo "---
+title: atomes&#58; tutorials
+# nav_order: 0
+nav_exclude: true
+date: 2025-04-07
+---
+
+# <img width=\"50px\" height=\"50px\" style=\"position:relative; bottom:-15px\" src=\"/atomes-tuto/assets/images/atomes.svg\" /> **atomes: tutorials**
+
+![](https://github.com/atomes/atomes-tuto.io/workflows/ns/badge.svg)
+![](https://www.codefactor.io/repository/github/atomes/atomes-tuto/badge)
+
+## Welcome to the tutorials of the **atomes** program
+
+
+[atomes][atomes] is a cross-platform Free (Open Source) software.  
+It is developped by [Dr. Sébastien Le Roux][slr], research engineer for the [CNRS][cnrs]
+
+<p align=\"center\">
+  <a href=\"https://www.cnrs.fr/\"><img width=\"100\" src=\"https://www.cnrs.fr/themes/custom/cnrs/logo.svg\" alt=\"CNRS logo\" align=\"center\"></a>
+</p>
+
+[Dr. Sébastien Le Roux][slr] works at the "Institut de Physique et Chimie des Matériaux de Strasbourg" [IPCMS][ipcms]
+
+<p align=\"center\">
+  <a href=\"https://www.ipcms.fr/\"><img width=\"100\" src=\"https://www.ipcms.fr/uploads/2020/09/cropped-dessin_logo_IPCMS_couleur_vectoriel_r%C3%A9%C3%A9quilibr%C3%A9-2.png\" alt=\"IPCMS logo\" align=\"center\"></a>
+</p>
+
+This website presents the user tutorials for the **atomes** program.
+
+This website is hosted on [GitHub][github] and was created using [Jekyll][jekyll]. 
+
+You can download the complete tutorials in PDF here: [atomes tutorials PDF][atomes-tuto]
+
+## atomes: user manual
+
+You can also check the **atomes** documentation:
+
+- [atomes: user manual][atomes-doc]
+
+## License
+
+This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\">Creative Commons Attribution 4.0 International License</a>&nbsp;&nbsp;<a rel=\"license\" href=\"http://creativecommons.org/licenses/by/4.0/\"><img alt=\"Licence Creative Commons\" style=\"border-width:0; position:relative; bottom:-10px\" src=\"https://i.creativecommons.org/l/by/4.0/88x31.png\" />
+
+
+[slr]:https://www.ipcms.fr/sebastien-le-roux/
+[cnrs]:https://www.cnrs.fr/
+[ipcms]:https://www.ipcms.fr/
+[github]:https://github.com/
+[jekyll]:https://jekyllrb.com/
+[atomes]:https://atomes.ipcms.fr/
+[atomes-tuto]:"$HROOT"atomes-tutorials.pdf
+[atomes-doc]:/atomes-doc" > $SITE_HOME/index.md
+}
+
+function add_katex {
+  echo "<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+   var mathElements = document.getElementsByClassName("math");
+   var macros = [];
+   for (var i = 0; i < mathElements.length; i++) {
+    var texText = mathElements[i].firstChild;
+    if (mathElements[i].tagName == "SPAN") {
+     katex.render(texText.data, mathElements[i], {
+      displayMode: mathElements[i].classList.contains('display'),
+      throwOnError: false,
+      macros: macros,
+      fleqn: false
+     });
+  }}});
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->" > tmp.html
+  cat $1 >> tmp.html
+  mv tmp.html $1
+}
+
+function add_mathjax {
+  echo "<script src=\"https://polyfill.io/v3/polyfill.min.js?features=es6\"></script>
+<script id=\"MathJax-script\" async src=\"https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js\"></script>" > tmp.html
+  cat $1 >> tmp.html
+  mv tmp.html $1
+}
+
+function add_math {
+  if [ $mathjax -eq 1 ]; then
+    add_mathjax $1
+  elif [ $katex -eq 1 ]; then
+    add_katex $1
+  fi
+}
+
+function add_footnote {
+  foots=`grep -m $1 '<li id' $FFILE|tail --lines=1`
+  echo "<section class=\"footnotes footnotes-end-of-document\" role=\"doc-endnotes\">
+<hr />  
+<ol>
+$foots
+</ol>
+</section>" >> $2
+}
+
+function check_for_foot_notes {
+  if [ -f $FFILE ]; then
+    nfoot=`grep -c '<li id' $FFILE`
+    for foot in $(seq 1 $nfoot)
+    do
+      foid=`grep -m $foot '<li id' $FFILE|tail --lines=1|awk '{printf $2}'|sed 's/id=\"//1'|sed 's/\"//1'`
+      ifid=`grep -c "$foid" $1`
+      if [ $ifid -eq 1 ]; then
+        add_footnote $foot $1
+        if [ $nfoot -gt 1 ]; then
+          grep -v "$ifid" $FFILE > fmp.html
+          mv fmp.html $FFILE
+          rm -f fmp.html
+        else
+          rm -f $FFILE
+        fi
+      fi
+    done
+  fi
+}
+
+function add_liquid_list {
+  echo "" >> $1
+  echo "{% include list.liquid all=true %}" >> $1
+}
+
+function print_sort {
+  echo "---" > $1/$2.md
+  tit=`echo $4|sed 's/_/ /g'|sed 's/:/\&#58;/g'`
+  echo "title: "$tit >> $1/$2.md
+  let pid=$5
+  if [ $pid -eq 1 ]; then
+    parent=`grep 'title' $1/../index.md|sed 's/title://g'|sed 's/:/&#58;/g'`
+    echo "parent: "$parent >> $1/$2.md  
+  fi
+  echo "nav_order: "$3 >> $1/$2.md
+  echo "date: "`date +%F` >> $1/$2.md
+  echo "maths: 1"  >> $1/$2.md
+  echo "---" >> $1/$2.md
+  echo "" >> $1/$2.md
+}
+
+function print_ssort {
+  echo "---" > $1/$2.md
+  tit=`echo $4|sed 's/_/ /g'|sed 's/:/\&#58;/g'`
+  echo "title: "$tit >> $1/$2.md
+  let pid=$5
+  if [ $pid -eq 1 ]; then
+    parent=`grep 'title' $1/index.md|sed 's/title://g'|sed 's/:/&#58;/g'`
+    echo "parent: "$parent >> $1/$2.md  
+  fi
+  echo "nav_order: "$3 >> $1/$2.md
+  echo "date: "`date +%F` >> $1/$2.md
+  echo "maths: 1"  >> $1/$2.md
+  echo "---" >> $1/$2.md
+  echo "" >> $1/$2.md
+}
+
+function print_me {
+  print_sort $1 $2 $3 $4 $5
+  tit=`echo $4|sed 's/_/ /g'|sed 's/:/\&#58;/g'`
+  echo "# "$tit >> $1/$2.md
+#  echo "{% include list.liquid all=true %}" >> $1/$2.md
+#  echo "{% include list.liquid %}" >> $1/$2.md
+}
+
+function print_sme {
+  print_ssort $1 $2 $3 $4 $5
+  tit=`echo $4|sed 's/_/ /g'|sed 's/:/\&#58;/g'`
+  echo "# "$tit >> $1/$2.md
+#  echo "{% include list.liquid all=true %}" >> $1/$2.md
+#  echo "{% include list.liquid %}" >> $1/$2.md
+}
+
+function prepare_all_ref {
+  lfile=$SITE_HOME/chap-labels.dat
+  ntchap=`cat $lfile|wc -l`
+  for chal in $(seq 1 $ntchap)
+  do
+    cnum=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $1}'`
+    clab=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $2}'`
+    cref=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $3}'`
+    nref=`grep -c '\['$clab'\]' $1`
+    if [ $nref -gt 0 ]; then
+      sed 's/\['$clab'\]/'$cnum'/g' $1 > tmp
+      nlt=`cat tmp|wc -l`
+      nlt=`cat tmp|wc -l`
+      if [ $nlt -gt 0 ]; then
+	mv tmp $1
+      fi
+    fi
+    nref=`grep -c '<a href="#'$clab'"' $1`
+    if [ $nref -gt 0 ]; then
+      sed 's/<a href=\"#'$clab'/<a href=\"'$cref'/g' $1 > tmp
+      nlt=`cat tmp|wc -l`
+      if [ $nlt -gt 0 ]; then
+	mv tmp $1
+      fi
+    fi
+  done
+  lfile=$SITE_HOME/sec-labels.dat
+  ntchap=`cat $lfile|wc -l`
+  for chal in $(seq 1 $ntchap)
+  do
+    cnum=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $1}'`
+    snum=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $2}'`
+    clab=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $3}'`
+    cref=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $4}'`
+    nref=`grep -c '\['$clab'\]' $1`
+    if [ $nref -gt 0 ]; then
+      sed 's/\['$clab'\]/'$cnum'\.'$snum'/g' $1 > tmp
+      nlt=`cat tmp|wc -l`
+      if [ $nlt -gt 0 ]; then
+	mv tmp $1
+      fi
+    fi
+    nref=`grep -c '<a href="#'$clab'"' $1`
+    if [ $nref -gt 0 ]; then
+      sed 's/<a href=\"#'$clab'/<a href=\"'$cref'/g' $1 > tmp
+      nlt=`cat tmp|wc -l`
+      if [ $nlt -gt 0 ]; then
+	mv tmp $1
+      fi
+    fi
+  done
+  lfile=$SITE_HOME/sub-sec-labels.dat
+  ntchap=`cat $lfile|wc -l`
+  for chal in $(seq 1 $ntchap)
+  do
+    cnum=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $1}'`
+    snum=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $2}'`
+    ssnum=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $3}'`
+    clab=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $4}'`
+    cref=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $5}'`
+    nref=`grep -c '\['$clab'\]' $1`
+    if [ $nref -gt 0 ]; then
+      sed 's/\['$clab'\]/'$cnum'\.'$snum'\.'$ssnum'/g' $1 > tmp
+      nlt=`cat tmp|wc -l`
+      if [ $nlt -gt 0 ]; then
+	mv tmp $1
+      fi
+    fi
+    nref=`grep -c '<a href="#'$clab'"' $1`
+    if [ $nref -gt 0 ]; then
+      sed 's/<a href=\"#'$clab'/<a href=\"'$cref'/g' $1 > tmp
+      nlt=`cat tmp|wc -l`
+      if [ $nlt -gt 0 ]; then
+	mv tmp $1
+      fi
+    fi
+  done
+  lfile=$SITE_HOME/sub-sub-sec-labels.dat
+  ntchap=`cat $lfile|wc -l`
+  for chal in $(seq 1 $ntchap)
+  do
+    cnum=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $1}'`
+    snum=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $2}'`
+    ssnum=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $3}'`
+    sssnum=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $4}'`
+    clab=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $5}'`
+    cref=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $6}'`
+    nref=`grep -c '\['$clab'\]' $1`
+    if [ $nref -gt 0 ]; then
+      sed 's/\['$clab'\]/'$cnum'\.'$snum'\.'$ssnum'\.'$sssnum'/g' $1 > tmp
+      nlt=`cat tmp|wc -l`
+      if [ $nlt -gt 0 ]; then
+	mv tmp $1
+      fi
+    fi
+    nref=`grep -c '<a href="#'$clab'"' $1`
+    if [ $nref -gt 0 ]; then
+      sed 's/<a href=\"#'$clab'/<a href=\"'$cref'/g' $1 > tmp
+      nlt=`cat tmp|wc -l`
+      if [ $nlt -gt 0 ]; then
+	mv tmp $1
+      fi
+    fi
+  done
+  lfile=$SITE_HOME/ft-labels.dat
+  ntchap=`cat $lfile|wc -l`
+  thishfile=`echo $1|sed 's/\.html//1'|sed 's/\///g'`
+  for chal in $(seq 1 $ntchap)
+  do
+    cnum=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $1}'`
+    fnum=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $2}'`
+    flab=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $3}'`
+    cref=`tac $lfile|tail --lines=$chal|tac|tail --lines=1|awk '{printf $4}'`
+    cfile=`echo $cref|sed 's/\///g'|sed 's/\\\//g'`
+    thisifile=`echo $SITE_HOME|sed 's/\///g'|sed 's/\\\//g'`
+    thisifile=$thisifile"_includes"$cfile
+    nref=`grep -c '\['$flab'\]' $1`
+    if [ $nref -gt 0 ]; then
+      sed 's/\['$flab'\]/'$cnum'\.'$fnum'/g' $1 > tmp
+      nlt=`cat tmp|wc -l`
+      if [ $nlt -gt 0 ]; then
+	mv tmp $1
+      fi
+    fi
+    nref=`grep -c '<a href="#'$flab'"' $1`
+    if [ $nref -gt 0 ]; then
+      if [ $thisifile != $thishfile ]; then
+	#echo "thisifile= "$thisifile", thishfile= "$thishfile 
+        sed 's/<a href=\"#'$flab'/<a href=\"'$cref'#'$flab'/g' $1 > tmp
+        nlt=`cat tmp|wc -l`
+        if [ $nlt -gt 0 ]; then
+          mv tmp $1
+        fi
+      fi
+    fi
+  done
+}
+
+function prepare_figure_captions {
+  let nfigs=`grep -c "<figcaption aria-hidden" $1`
+  let toli=`cat $1|wc -l`
+  echo "File: "$1" Chapter= "$nchap  >> $FLOG
+  echo "Total found captions: "$nfigs >> $FLOG
+  fcid=$nchap
+  fnid=0
+  nref=0
+  for fig in $(seq 1 $nfigs)
+  do
+    fid=`grep -m $fig -B 5 "<figcaption aria-hidden" $1|tail --lines=5|tac|tail --lines=1|sed 's/<div id=\"//1'|sed 's/\">//1'`
+    #echo "fid= "$fid >> $FLOG
+    fil=`grep -m $fig -n "<figcaption aria-hidden" $1|tail --lines=1|sed 's/:<figcaption/ /1'|awk '{printf $1}'`
+    #echo "fig= "$fig", line= "$fil >> $FLOG
+    fnum=`grep -m 1 'data-reference="'$fid'">' $1|sed 's/.*data-reference=\"'$fid'\">//1'|sed 's/<\/a>.*//1'`
+    if [ -z $fnum ]; then
+      echo "Figure was not refered to !" >> $FLOG
+      let fniid=$fnid+1
+      fnum=$fcid"."$fniid
+      nref=1
+    else
+      nref=0
+    fi
+    echo $fnum >> $FLOG
+    fcid=`echo $fnum|sed 's/\..*//1'`
+    fnid=`echo $fnum|sed 's/.*\.//1'`
+    ficap=`grep -m $fig "<figcaption aria-hidden" $1|tail --lines=1|sed 's/<figcaption aria-hidden=\"true\">/<figcaption aria-hidden=\"true\"><strong><span>Figure '$fcid'.'$fnid':\<\/span><\/strong> /1'`
+    # This is where you deal with figure adresses ... prepare the file that contains it
+    # echo $fid" "$2 >> $FIGREFS
+    let ail=$toli-$fil
+    let fil=$fil-1
+    tac $1|tail --lines=$fil|tac > res.html
+    echo $ficap >> res.html
+    #echo "ficap= "$ficap >> $FLOG
+    tail --lines=$ail $1 >> res.html
+    mv res.html $1
+  done
+}
+
+function prepare_table_captions {
+  let ntabs=`grep -c "<caption>" $1`
+  let tota=`cat $1|wc -l`
+  echo "File: "$1" Chapter= "$nchap  >> $TLOG
+  tcid=$nchap
+  tnid=0
+  echo "Total found table captions: "$ntabs >> $TLOG
+  for tab in $(seq 1 $ntabs)
+  do
+    tid=`grep -m $tab -B 2 "<caption>" $1|tail --lines=3|tac|tail --lines=1|sed 's/<div id=\"//1'|sed 's/\">//1'`
+    echo "tid= "$tid >> $TLOG
+    til=`grep -m $tab -n "<caption>" $1|tail --lines=1|sed 's/:<caption>/ /1'|awk '{printf $1}'`
+    echo "tig= "$tab", line= "$til >> $TLOG
+    tnum=`grep -m 1 'data-reference="'$tid'">' $1|sed 's/.*data-reference=\"'$tid'\">//1'|sed 's/<\/a>.*//1'`
+    if [ -z $tnum ]; then
+      echo "Table was not refered to !" >> $TLOG
+      let tniid=$tnid+1
+      tnum=$tcid"."$tniid
+      nref=1
+    else
+      nref=0
+    fi
+    echo $tnum >> $TLOG
+    tcid=`echo $tnum|sed 's/\..*//1'`
+    tnid=`echo $tnum|sed 's/.*\.//1'`
+    ticap=`grep -m $tab "<caption>" $1|tail --lines=1|sed 's/<caption>/<caption><strong><span>Table '$tcid'.'$tnid':\<\/span><\/strong> /1'`
+    # This is where you deal with table adresses ... prepare the file that contains it
+    # echo $tid" "$2 >> $TABREFS
+    let ail=$tota-$til
+    let til=$til-1
+    tac $1|tail --lines=$til|tac > res.html
+    echo $ticap >> res.html
+    echo "ticap= "$ticap >> $TLOG
+    tail --lines=$ail $1 >> res.html
+    mv res.html $1
+  done
+}
+
+function prepare_html_file {
+  prepare_figure_captions $1 $2
+  prepare_table_captions $1 $2
+  prepare_all_ref $1
+}
+
+function prepare_subsections {
+  ssec_inc_md=$sec_inc_md/section-$nsec
+  let nsubs=`grep -c '<h3 id' $sec_html`
+  let lenb=`cat $sec_html|wc -l`
+  if [ $nsubs -lt 1 ]; then
+    prepare_html_file $sec_html $ssec_inc_md
+    add_math $sec_html
+    check_for_foot_notes $sec_html
+    echo "" >> $sec_doc/index.md
+    echo "{% include "$ssec_inc_md".html %}" >> $sec_doc/index.md
+    echo "" >> $sec_sdoc/index.md
+    echo "{% bibliography --cited %}" >> $sec_doc/index.md
+  else
+    for nssec in $(seq 1 $nsubs)
+    do
+      echo "    Subections: "$nssec >> $SLOG 
+      sstitle=`cat $sec_doc/$nssec-title`
+      print_sme $sec_doc "sub-section-"$nssec $nssec $sstitle 1
+      rm -f $sec_doc/$nssec-title
+      echo "" >> $sec_doc/sub-section-$nssec.md
+      echo "{% include "$sec_inc_md"/sub-section-"$nssec".html %}" >> $sec_doc/sub-section-$nssec.md
+      echo "" >> $sec_doc/sub-section-$nssec.md
+      echo "{% bibliography --cited %}" >> $sec_doc/sub-section-$nssec.md
+      echo "" >> $sec_doc/sub-section-$nssec.md
+      prepare_html_file $sec_inc/sub-section-$nssec.html $5/sub-section-$nssec
+      add_math $sec_inc/sub-section-$nssec.html
+      check_for_foot_notes $sec_inc/sub-section-$nssec.html
+    done
+    # If anything before the first sub-section => Intro
+    ssecid=`grep -n '<h3 id' $sec_html|tac|tail --lines=1|tac|tail --lines=1|awk '{printf $1}'|sed 's/:<h3//1'`
+    let ssta=$ssecid-1
+    if [ $ssta -gt 0 ]; then
+      tac $sec_html|tail --lines=$ssta|tac > tmp.html
+      mv tmp.html $sec_html
+      prepare_html_file $sec_html $sec_inc_md
+      add_math $sec_html
+      check_for_foot_notes $sec_html
+      echo "" >> $sec_doc/index.md
+      echo "{% include "$ssec_inc_md".html %}" >> $sec_doc/index.md
+      # add_liquid_list $sec_doc/index.md
+      echo "" >> $sec_doc/index.md
+      echo "{% bibliography --cited %}" >> $sec_doc/index.md
+      echo "" >> $sec_doc/index.md
+    else
+      rm -f $sec_html
+      # add_liquid_list $sec_doc/index.md
+    fi
+  fi
+}
+
+function remove_last_lign {
+  nl=`cat $1|wc -l`
+  let nli=$nl-1
+  tac $1|tail --lines=$nli|tac > tmp
+  mv tmp $1
+  rm -f tmp
+}
+
+# $1 = $chap_dir = $inc_dir/$chap_id = $inc_dir/chap-$seq or $inc_dir/appendix/chap-$seq
+# $2 = $chap_doc = $doc_dir/$chap_id = $doc_dir/chap-$seq or $doc_dir/appendix/app-$seq 
+# $3 = $chap_id = chap-$seq or app-$seq
+# $4 = chap or appendix/app
+# $5 = $nchap
+function prepare_sections {
+  chap_html=$1/$3.html
+  chap_id=$3
+  chap_doc=$2
+  chap_inc=$1
+  chap_inc_md=$4-$nchap
+  let nsections=`grep -c '<h2 id' $chap_html`
+  let lens=`cat $chap_html|wc -l`
+  if [ $nsections -lt 1 ]; then
+    add_math $chap_html
+    prepare_html_file $chap_html $chap_inc_md
+    #check_for_foot_notes $chap_html
+    echo "" >> $chap_doc/index.md
+    echo "{% include "$chap_inc_md"/"$chap_id".html %}" >> $chap_doc/index.md
+    echo "" >> $chap_doc/index.md
+    echo "{% bibliography --cited %}" >> $chap_doc/index.md
+  else
+    for nsec in $(seq 1 $nsections)
+    do
+      stitle=`cat $chap_doc/$nsec-title`
+      sec_doc=$chap_doc/section-$nsec
+      print_me $sec_doc "index" $nsec $stitle 1
+      rm -f $chap_doc/$nsec-title
+      echo "" >> $sec_doc/index.md
+      sec_inc_md=$chap_inc_md/"section-"$nsec
+      sec_inc=$chap_inc/section-$nsec
+      echo "  Sections: "$nsec >> $SLOG
+#      tac $chap_html|tail --lines=$stb|tac|tail --lines=$stc > $sec_inc/section-$nsec.html
+      sec_html=$sec_inc/section-$nsec.html
+      let nsubs=`grep '<h3 id' $sec_html|wc -l`
+      if [ $nsubs -gt 0 ]; then
+	# We found some subsections
+	# Before we need to cut the tex file in sections
+        prepare_subsections
+      else
+	echo "{% include "$sec_inc_md"/section-"$nsec".html %}" >> $sec_doc/index.md
+        echo "" >> $sec_doc/index.md
+        echo "{% bibliography --cited %}" >> $sec_doc/index.md
+	prepare_html_file $sec_html $sec_inc_md
+        add_math $sec_html
+        check_for_foot_notes $sec_html
+      fi
+    done
+    # If anything before the first section => Intro
+    secid=`grep -n '<h2 id' $chap_html|tac|tail --lines=1|tac|tail --lines=1|awk '{printf $1}'|sed 's/:<h2//1'`
+    let stac=$secid-1
+    if [ $stac -gt 0 ]; then
+      tac $chap_html|tail --lines=$stac|tac > tmp.html
+      mv tmp.html $chap_html
+      prepare_html_file $chap_html $chap_inc_md
+      add_math $chap_html
+      check_for_foot_notes $chap_html
+      echo "" >> $chap_doc/index.md
+      echo "{% include "$chap_inc_md"/"$chap_id".html %}" >> $chap_doc/index.md
+      # add_liquid_list $chap_doc/index.md
+      echo "" >> $chap_doc/index.md
+      echo "{% bibliography --cited %}" >> $chap_doc/index.md
+    else
+      # add_liquid_list $chap_doc/index.md
+      rm -f $chap_html
+    fi
+    # add_liquid_list $sec_doc/index.md
+  fi
+}
+
+# $1 HTML file
+# $2 = _includes/ or _includes/appendix
+# $3 = docs or docs/appendix
+# $4 = chap or appendix/app
+# $5 = chap or app
+function prepare_chapters {
+  html_file=$SITE_HOME/$1.html
+  inc_dir=$SITE_HOME/$2
+  doc_dir=$SITE_HOME/$3
+  chap_md=$4
+  chap=$5
+  tex_dir=$SITE_HOME/../$4
+  mkdir -p $inc_dir
+  mkdir -p $doc_dir
+  let nchapters=`grep -c '<h1 id' $SITE_HOME/$1.html`
+  let lenc=`cat $SITE_HOME/$1.html|wc -l`
+  for nchap in $(seq 1 $nchapters)
+  do
+    chap_id=$chap-$nchap
+    chap_inc=$inc_dir/$chap_id
+    chap_doc=$doc_dir/$chap_id
+    tex_file=$tex_dir-$nchap/$chap_id.tex
+    cname=`grep '\\\chapter{' $tex_file|sed 's/\\\chapter{//1' |sed 's/\\\atomes/atomes/1'|sed 's/}//g'`
+    title=`echo $cname|sed 's/\\\aob{//1'|sed 's/{\\\em{//1'|sed 's/}//g'|sed 's/ /_/g'|sed 's/\\$g\\$/<it>g<\/it>/1'|sed 's/\\$_2\\$/<sub>2<\/sub>/1'`
+    echo "Chapter: "$title >> $SLOG
+    if [ $chap == 'app' ]; then
+      print_me $chap_doc "index" $nchap $title 1
+    else
+      print_me $chap_doc "index" $nchap $title 0
+    fi
+    prepare_sections $chap_inc $chap_doc $chap_id $chap_md
+  done
+}
+
+function prepare_figure_labels {
+  hfile=$1
+  let idfig=$2
+  let idtab=$3
+  hadress=$4
+  nfigcap=`grep -c "<img src=" $hfile`
+  let nfigs=$nfigcap
+  let tfig=0
+  this_fig=$2
+  for fig in $(seq 1 $nfigs)
+  do
+    fid=`grep -m $fig "<img src=" $hfile|grep " id="|tail --lines=1|awk '{printf $3}'|sed 's/id=\"//1'|sed 's/\"//1'`
+    if [ -n "$fid" ]; then
+      let tfig=$tfig+1
+      let this_fig=$idfig+$tfig
+      echo $nchap" "$this_fig" "$fid" "$HROOT$hadress >> $SITE_HOME/fig-tab-labels.dat
+    fi
+  done
+  let totfig=$this_fig
+  ntabcap=`grep -c "<table>" $hfile`
+  let ntabs=$ntabcap
+  let ttab=0
+  this_tab=$3
+  for tab in $(seq 1 $ntabs)
+  do
+    tid=`grep -m $tab -B1 "<table>" $hfile|tail --lines=2|grep "id="|sed 's/<div id=\"//1'|sed 's/\">//1'`
+    if [ -n "$tid" ]; then
+      let ttab=$ttab+1
+      let this_tab=$idtab+$ttab
+      echo $nchap" "$this_tab" "$tid" "$HROOT$hadress >> $SITE_HOME/fig-tab-labels.dat
+    fi
+  done
+  let totab=$this_tab
+}
+
+function prepare_subsection_labels {
+  sec_doc=$1
+  sec_inc=$2
+  sec_html=$3
+  let lenb=`cat $sec_html|wc -l`
+  if [ $nsubs -gt 0 ]; then
+    sslgt=`cat tmp.tex|wc -l`
+    let sslt=$sslgt
+    for nssec in $(seq 1 $nsubs)
+    do
+      ssname=`grep -m $nssec '\\\subsection' tmp.tex|tail --lines=1| sed 's/\\\subsection{//1'|sed 's/\\\subsection\*{//1'|sed 's/\\\atomes/atomes/1'`
+      sstitl=`echo $ssname|sed 's/\\\aob{//1'|sed 's/{\\\em{//1'|sed 's/}//g'|sed 's/atomes\\\ /atomes /1'|sed 's/ /_/g'`
+      sstitle=`echo $sstitl|sed 's/\\\rstat\\\/ring_statistics/1'|sed 's/\\\con/connectivity/1'`
+      let ssta=`grep -n -m $nssec '<h3 id' $sec_html|tail --lines=1|awk '{printf $1}'|sed 's/:<h3//1'`
+      if [ $nssec -lt $nsubs ]; then
+        let nses=$nssec+1
+        ssecnext=`grep -n '<h3 id' $sec_html|tac|tail --lines=$nses|tac|tail --lines=1|awk '{printf $1}'|sed 's/:<h3//1'`
+        let sstb=$ssecnext-1
+      else
+        let sstb=$lenb-1
+      fi
+      let sstc=$sstb-$ssta
+      tac $sec_html|tail --lines=$sstb|tac|tail --lines=$sstc > $sec_inc/sub-section-$nssec.html
+      echo $sstitle > $sec_doc/$nssec-title
+      # print_me $sec_doc "sub-section-"$nssec $nssec $sstitle 0
+      # echo "" >> $sec_doc/sub-section-$nssec.md
+      # echo "{% include "$sec_inc_md"/sub-section-"$nssec".html %}" >> $sec_doc/sub-section-$nssec.md
+      # echo "" >> $sec_doc/sub-section-$nssec.md
+      # echo "{% bibliography --cited %}" >> $sec_doc/sub-section-$nssec.md
+      # echo "" >> $sec_doc/sub-section-$nssec.md
+      sslab=`grep -A2 -m $nssec '\\\subsection' tmp.tex|tail --lines=3|grep "label{"|sed 's/\\\label{//1'|sed 's/}//1'`
+      if [ -n "$sslab" ]; then
+        echo $nchap" "$nsec" "$nnsec" "$sslab" "$HROOT$chap_md"-"$nchap"/section-"$nsec"/sub-section-"$nssec >> $SITE_HOME/sub-section-labels.dat
+      fi
+      prepare_figure_labels $sec_inc/sub-section-$nssec.html $totfig $totab $chap_md"-"$nchap"/section-"$nsec"/sub-section-"$nssec
+      # Now subsubsections
+      let sssta=`grep -n -m $nssec '\\\subsection' tmp.tex|tail --lines=1|sed 's/:\\\subsection/ /1'|awk '{printf $1}'`
+      if [ $nssec -lt $nsubs ]; then
+        let nsses=$nssec+1
+        ssecnext=`grep -n -m $nsses '<h3 id' $sec_html|tail --lines=1|awk '{printf $1}'|sed 's/:<h3//1'`
+        let ssstb=$ssecnext-1
+      else
+        let ssstb=$sslt
+      fi
+      let ssstc=$ssstb-$sssta
+      tac tmp.tex|tail --lines=$ssstb|tac|tail --lines=$ssstc > sss.tex
+      let nssubs=`grep -c '\\\subsubsection' sss.tex`
+      for nsssec in $(seq 1 $nssubs)
+      do
+        ssslab=`grep -A2 -m $nsssec '\\\subsubsection' sss.tex|tail --lines=3|grep "label{"|sed 's/\\\label{//1'|sed 's/}//1'`
+        if [ -n "$ssslab" ]; then
+          echo $nchap" "$nsec" "$nssec" "$nsssec" "$ssslab" "$HROOT$chap_md"-"$nchap"/section-"$nsec"/sub-section-"$nssec"#"$ssslab >> $SITE_HOME/sub-sub-section-labels.dat
+        fi
+      done
+    done
+    rm -f sss.tex
+  fi
+}
+
+#prepare_section_labels $chap_inc $chap_doc $chap_id $chap $nchap
+function prepare_section_labels {
+  chap_html=$1/$3.html
+  chap_id=$3
+  chap_doc=$2
+  chap_inc=$1
+  chap_inc_md=$4-$nchap
+  let nsections=`grep -c '<h2 id' $chap_html`
+  let lens=`cat $chap_html|wc -l`
+  if [ $nsections -gt 0 ]; then
+    for nsec in $(seq 1 $nsections)
+    do
+      sec_inc_md=$chap_inc_md/"section-"$nsec
+      sname=`grep -m $nsec '\\\section' $tex_file|tail --lines=1|sed 's/\\\section{//1'|sed 's/\\\section\*{//1'|sed 's/\\\atomes\\\/atomes/1'|sed 's/\\\atomes/atomes/1'`
+      stitle=`echo $sname|sed 's/\\\aob{//1'|sed 's/{\\\em{//1'|sed 's/}//g'|sed 's/ /_/g'|sed 's/\\$g\\$/<it>g<\/it>/1'|sed 's/\\$_2\\$/<sub>2<\/sub>/1'`
+      echo $stitle
+      let sta=`grep -n -m $nsec '<h2 id' $chap_html|tail --lines=1|awk '{printf $1}'|sed 's/:<h2//1'`
+      if [ $nsec -lt $nsections ]; then
+        let nes=$nsec+1
+        secnext=`grep -n -m $nes '<h2 id' $chap_html|tail --lines=1|awk '{printf $1}'|sed 's/:<h2//1'`
+        let stb=$secnext-1
+      else
+        let stb=$lens-1
+      fi
+      let stc=$stb-$sta
+      sec_doc=$chap_doc/section-$nsec
+      sec_inc=$chap_inc/section-$nsec
+      mkdir -p $sec_doc
+      mkdir -p $sec_inc
+      tac $chap_html|tail --lines=$stb|tac|tail --lines=$stc > $sec_inc/section-$nsec.html
+      sec_html=$sec_inc/section-$nsec.html
+      slab=`grep -A2 -m $nsec '\\\section' $tex_file|tail --lines=3|grep "label{"|sed 's/\\\label{//1'|sed 's/}//1'`
+      if [ -n "$slab" ]; then
+        echo $nchap" "$nsec" "$slab" "$HROOT$chap_md"-"$nchap"/section-"$nsec"/" >> $SITE_HOME/section-labels.dat
+      fi
+      let nsubs=`grep '<h3 id' $sec_html|wc -l`
+      echo $stitle > $chap_doc/$nsec-title
+      # print_me $sec_doc "index" $nsec $stitle 1
+      # echo "" >> $sec_doc/index.md
+      if [ $nsubs -gt 0 ]; then
+        # We found some subsections
+	# Before we need to cut the tex file in sections
+        sect_init=`grep -n -m $nsec '\\\section' $tex_file|tail --lines=1|sed 's/:\\\sectio/ /1'|awk '{printf $1}'`
+        let nnli=`cat $tex_file|wc -l`
+	let sect_end=$nnli-$sect_init
+	if [ $nsec -eq $nsections ]; then
+	  tail --lines=$sect_end $tex_file > tmp.tex
+	else
+          let nnsec=$nsec+1
+          sect_end=`grep -n -m $nnsec '\\\section' $tex_file|tail --lines=1|sed 's/:\\\sectio/ /1'|awk '{printf $1}'`
+	  let sect_fin=$sect_end-$sect_init
+	  let sect_fin=$sect_fin-1
+	  tac $tex_file|tail --lines=$sect_end|tac|tail --lines=$sect_fin > tmp.tex
+	fi
+        prepare_subsection_labels $sec_doc $sec_inc $sec_html
+        rm -f tmp.tex
+      else
+      	# No subsections
+        prepare_figure_labels $sec_html $totfig $totab $chap_md"-"$nchap"/section-"$nsec
+      fi
+    done
+  else
+    prepare_figure_labels $chap_html $totfig $totab $chap_md"-"$nchap
+  fi
+}
+
+# prepare_chapter_labels normal _includes doc chap chap
+# prepare_chapter_labels appendix _includes/appendix doc/appendix appendix/app app
+
+function prepare_chapter_labels {
+  html_file=$SITE_HOME/$1.html
+  inc_dir=$SITE_HOME/$2
+  doc_dir=$SITE_HOME/$3
+  chap_md=$4
+  chap=$5
+  tex_dir=$SITE_HOME/../$chap_md
+  let nchapters=`grep -c '<h1 id' $html_file`
+  let lenc=`cat $html_file|wc -l`
+  for nchap in $(seq 1 $nchapters)
+  do
+    let totfig=0
+    let totab=0
+    chap_id=$chap-$nchap
+    chap_inc=$inc_dir/$chap_id
+    chap_doc=$doc_dir/$chap_id
+    tex_file=$tex_dir-$nchap/$chap_id.tex
+    mkdir -p $chap_inc
+    mkdir -p $chap_doc
+    clab=`grep -A2 -m 1 '\\\chapter' $tex_file|grep "label{"|sed 's/\\\label{//1'|sed 's/}//1'`
+    if [ -n "$clab" ]; then
+      echo $nchap" "$clab" "$HROOT$chap_md"-"$nchap"/" >> $SITE_HOME/chapter-labels.dat
+    fi
+    cname=`grep '\\\chapter' $tex_file|sed 's/\\\chapter{//1' |sed 's/\\\atomes/atomes/1'|sed 's/}//g'`
+    title=`echo $cname|sed 's/\\\aob{//1'|sed 's/{\\\em{//1'|sed 's/}//g'|sed 's/ /_/g'|sed 's/\\$g\\$/<it>g<\/it>/1'|sed 's/\\$_2\\$/<sub>2<\/sub>/1'`
+    let sta=`grep -n -m $nchap '<h1 id' $html_file|tail --lines=1|awk '{printf $1}'|sed 's/:<h1//1'`
+    if [ $nchap -lt $nchapters ]; then
+      let nchs=$nchap+1
+      chapnext=`grep -n -m $nchs '<h1 id' $html_file|tail --lines=1|awk '{printf $1}'|sed 's/:<h1//1'`
+      let stb=$chapnext-1
+    else
+      let stb=$lenc-1
+    fi
+    let stc=$stb-$sta
+    tac $html_file|tail --lines=$stb|tac|tail --lines=$stc > $chap_inc/$chap_id.html
+    prepare_section_labels $chap_inc $chap_doc $chap_id $chap_md
+  done
+}
+
+function correct_headers 
+{
+# This only affects the RINGS stat part.
+  sed 's/<thead>/<tbody>/g' $1 > $2
+  sed 's/<\/thead>/<\/tbody>/g' $2 > $1
+  sed 's/<th style/<td style/g' $1 > $2
+  sed 's/<\/th>/<\/td>/g' $2 > $1
+  sed 's/tr class=\"header\"/tr class=\"even\"/g' $1 > $2
+  sed 's/<th colspan=\"2\"/<td colspan=\"2\"/g' $2 > $1
+}
+
+function pandoc_pass
+{
+  pandoc --mathjax tutorials.tex --bibliography full-biblio.bib --wrap=none --default-image-extension=png -o site/$HFILE >& $SLOG
+  cp site/$HFILE .
+  cd site
+  #Fixing citations
+  nspans=`grep -c '"></span>' $HFILE`
+  ncits=`grep -c 'span class="citation"' $HFILE`
+  for cit in $(seq 1 $ncits)
+  do
+    cil=`grep -T -n -m $cit 'span class="citation"' $HFILE|tail --lines=1|awk '{printf $1}'|sed 's/://1'`
+    let up=$cil-1
+    tac $HFILE|tail --lines=$up|tac > up.html
+    let do=`cat $HFILE|wc -l`
+    let do=$do-$cil
+    tail --lines=$do $HFILE > do.html
+    citl=`grep -m $cit 'span class="citation"' $HFILE|tail --lines=1`
+    err=`echo $citl|grep -c 'label="'`
+    if [ $err -gt 0 ]; then
+      echo "Warning: citation correction issue at line: "$cil
+      echo "Warning: citation correction issue at line: "$cil >> $SLOG
+      echo $citl|sed 's/<span class=\"citation\" data-cites=\"/{\% cite /g' |sed 's/\"><\/span>/ %}/g'|sed 's/ %}/\"><\/span>/1' > ci.html
+    else
+      echo $citl|sed 's/<span class=\"citation\" data-cites=\"/{\% cite /g' |sed 's/\"><\/span>/ %}/g' > ci.html
+    fi
+    cat up.html > $HFILE
+    cat ci.html >> $HFILE
+    cat do.html >> $HFILE
+    rm -f up.html
+    rm -f do.html
+    rm -f ci.html
+  done
+  nspan=`grep -c '"></span>' $HFILE`
+  echo "Before: "$nspans", cites= "$ncits", after: "$nspan >> $SLOG 
+
+  #Keyboard shortcuts
+  sed 's/&lt;kbd&gt;/<kbd>/g' $HFILE > res.html
+  sed 's/&lt;\/kbd&gt;/<\/kbd>/g' res.html > $HFILE
+  sed 's/<kbd>\&amp\;/<kbd>\&/g' $HFILE > res.html
+  sed 's/+ <kbd>/+<kbd>/g' res.html > $HFILE
+  mv $HFILE res.html
+  # Arrows
+  sed 's/<span class=\"math inline\">\\(\&amp\;swArr\;\\)<\/span>/\&swArr\;/g' res.html > $HFILE
+  sed 's/<span class=\"math inline\">\\(\&amp\;nwArr\;\\)<\/span>/\&nwArr\;/g' $HFILE > res.html
+
+  #Remote empty figure captions
+  sed 's/<figcaption aria-hidden=\"true\">image<\/figcaption>//g' res.html > $HFILE
+
+  # Fixing images path at site root
+  sed 's/src=\"img/src=\"'$HRT'img/g' $HFILE > res.html
+  sed 's/<div class=\"center\"/<div align=\"center\"/g' res.html > $HFILE
+
+  correct_headers $HFILE res.html
+
+  sed 's/<\/figure>/<br \/><\/figure>/g' $HFILE > res.html
+  mv res.html $HFILE
+  
+  # Correct chem formula's in code environments
+  sed 's/_2<\/code>/<sub>2<\/sub><\/code>/g' $HFILE > res.html
+  sed 's/_{240}<\/code>/<sub>240<\/sub><\/code>/g' res.html > $HFILE
+  sed 's/_4]<\/code>/<sub>4<\/sub>]<\/code>/g' $HFILE > res.html
+  # ^circ commands not properly converted in code environments
+  sed 's/\^\\circ 4<\/code>/°4<\/code>/1' res.html > $HFILE
+
+  # Command line section
+
+  sed 's/<\/code><code>//g' $HFILE > res.html
+  sed 's/<code>atomes<\/code>/atomes/g' res.html > $HFILE
+  sed 's/<\/code><span /<span /g' $HFILE > res.html
+  sed 's/<\/span><code>/<\/span>/g' res.html > $HFILE
+  sed 's/<span><code>-pdb<\/code><\/span>/-pdb/g' $HFILE > res.html
+  sed 's/<span><code>-cif<\/code><\/span>/-cif/g' res.html > $HFILE
+  sed 's/<span><code>file\.awf<\/code><\/span>/file\.awf/g' $HFILE > res.html
+  sed 's/localhost \]\$/localhost ~\]\$ /g' res.html > $HFILE
+  sed 's/this\.f<span/this\.f <span/1' $HFILE > res.html
+  sed 's/that\.f\*/that\.f \*/1' res.html > $HFILE 
+  sed 's/<span><strong><span>/<span><strong>/g' $HFILE > res.html
+  sed 's/<\/span><\/strong><\/span>/<\/strong><\/span>/g' res.html > $HFILE
+   
+  grep -v '<p><em></em></p>' $HFILE > res.html
+  ## Preserve the <section> footnote:
+  #fid=`grep -n "<section " res.html|sed 's/:<sec/ /1'|awk '{printf $1}'`
+  #nhtml=`cat res.html|wc -l`
+  #let foot=$nhtml-$fid
+  #let foot=$foot+1
+  #tail --lines=$foot res.html > $FFILE
+  #let fid=$fid-1
+  #tac res.html|tail --lines=$fid|tac > $HFILE
+  #rm -f res.html
+
+  #sed 's/<figcaption aria-hidden=\"true\"><strong><span>Figure /<figcaption aria-hidden=\"true\"><strong><span>Figure A:/g' appendix.html > tmp.html
+  #mv tmp.html appendix.html
+
+  mv res.html tutorials.html
+  cp tutorials.html $SITE_HOME/normal.html
+
+  prepare_chapter_labels normal _includes doc chap chap
+  sed 's/\//\\\//g' $SITE_HOME/chapter-labels.dat > chap-labels.dat
+  sed 's/\//\\\//g' $SITE_HOME/section-labels.dat > sec-labels.dat
+  sed 's/\//\\\//g' $SITE_HOME/sub-section-labels.dat > sub-sec-labels.dat
+  sed 's/\//\\\//g' $SITE_HOME/sub-sub-section-labels.dat > sub-sub-sec-labels.dat
+  sed 's/\//\\\//g' $SITE_HOME/fig-tab-labels.dat > ft-labels.dat
+  
+  prepare_chapters normal _includes doc chap chap
+  cd ..
+}
+
+function set_up_dir
+{
+  rm -rf $SDIR
+  mkdir -p $SDIR
+  cd $SDIR
+  ln -s ../tutorials/tutorials.tex .
+  ln -s ../tutorials/bibsymb.tex .
+  ln -s ../tutorials/full-biblio.bib .
+  ln -s ../tutorials/chap-? .
+
+  # Need to modify latex preambule, and pango do not understand latex commands
+  sed 's/fig-data/fig-web/1' ../tutorials/preambule.tex > preambule.tex
+  sed 's/\\usepackage{keystroke}//1' preambule.tex > tmp.tex
+  sed 's/\\laf}{\\\\}/\\laf}{}/1' tmp.tex > preambule.tex
+  sed 's/{{\\em{\\bf{atomes}}}}/{{\\bf{atomes}}}/1' preambule.tex > tmp.tex
+  mv tmp.tex preambule.tex
+  echo "
+  \\newcommand{\\Ctrl}{<kbd>Ctrl</kbd>}
+  \\newcommand{\\Shift}{<kbd>Shift</kbd>}
+  \\newcommand{\\Alt}{<kbd>Alt</kbd>}
+  \\newcommand{\\Esc}{<kbd>Esc</kbd>}
+  \\newcommand{\\Spacebar}{<kbd>Space</kbd>}
+  \\newcommand{\\RArrow}{<kbd>&rarr;</kbd>}
+  \\newcommand{\\LArrow}{<kbd>&larr;</kbd>}
+  \\newcommand{\\UArrow}{<kbd>&uarr;</kbd>}
+  \\newcommand{\\DArrow}{<kbd>&darr;</kbd>}
+  \\newcommand{\\keystroke}[1]{<kbd>#1</kbd>}
+  \\renewcommand{\\raisebox}[2]{#2}
+  \\renewcommand{\\Swarrow}{&swArr;}
+  \\renewcommand{\\Nwarrow}{&nwArr;}" >> preambule.tex
+
+  rm -rf site
+  mkdir site
+}
+
+UP_PANDOC=1
+if [ $UP_PANDOC -eq 1 ]; then
+  set_up_dir
+  pandoc_pass 
+fi
+
+# Preparing Jekyll build
+# First adjust files and folders permissions
+function correct_dir_perm
+{
+  liste_dir=`ls -l|grep '^d'|awk '{printf $NF" "}'`
+  for dir in $liste_dir
+  do
+    chmod 744 $dir
+    cd $dir
+    correct_dir_perm
+    cd .. 
+  done
+}
+
+index_md
+chmod 644 $SITE_HOME/index.md
+
+cd $SITE_HOME/
+chmod 744 doc
+cd doc
+correct_dir_perm
+cd ..
+chmod 744 _includes
+cd _includes
+correct_dir_perm 
+cd ..
+liste_md=`find ./ -name "*.md"|awk '{printf $NF" "}'`
+for md in $liste_md
+do
+  chmod 644 $md
+done
+liste_html=`find ./ -name "*.html"|awk '{printf $NF" "}'`
+for html in $liste_html
+do
+  chmod 644 $html
+done
+
+# Add images, clean not needed and adjust permissions
+cp -r $SDIR/../tutorials/img .
+chmod 744 img
+cd img
+liste_xbb=`find ./ -name "*.xbb"|awk '{printf $NF" "}'`
+for xbb in $liste_xbb
+do
+  rm -f $xbb
+done
+liste_ps=`find ./ -name "*.eps"|awk '{printf $NF" "}'`
+for ps in $liste_ps
+do
+  rm -f $ps
+done
+liste_gimp=`find ./ -name "*.xcf"|awk '{printf $NF" "}'`
+for gi in $liste_gimp
+do
+  rm -f $gi
+done
+liste_png=`find ./ -name "*.png"|awk '{printf $NF" "}'`
+for png in $liste_png
+do
+  chmod 644 $png
+done
+correct_dir_perm 
+cd ..
+
+# Now sending this to jekyll
+UP_JEKYLL=1
+JEKYLL_DIR=$HOME/files/git-files/atomes/atomes-tutorials/atomes-jekyll
+if [ $UP_JEKYLL -eq 1 ]; then
+  if [ -d $JEKYLL_DIR ]; then
+    cd $JEKYLL_DIR
+    rm -rf chap-? _includes img
+    cp -r $SITE_HOME/doc/* .
+    cp -r $SITE_HOME/_includes .
+    mv $SITE_HOME/img .
+    cp $SITE_HOME/index.md .
+    cp $SDIR/../tutorials/tutorials.pdf ./atomes-tutorials.pdf
+    cp ../prep-jekyll/nav_footer_custom.html _includes/
+    cp -r ../prep-jekyll/Gemfile .
+    cp -r ../prep-jekyll/assets .
+    ln -s assets/images/favicon.ico .
+    touch sw.caches.js
+    cp -r ../prep-jekyll/_sass .
+    cp -r ../prep-jekyll/_bibliography .
+    sed 's/BASEURL/'$HJR'/g' ../prep-jekyll/jekyll_config.yml.in > _config.yml
+  fi
+fi
+
+cd $SITE_HOME
+# rm -f normal.html
+# rm -f $FFILE
+# rm -f $HFILE
+cd ..
+
+cd $JEKYLL_DIR/
+cd ..
+#./build-atds main_build_deploy
