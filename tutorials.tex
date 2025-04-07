@@ -1,0 +1,63 @@
+\documentclass{these-seb}
+
+\input{preambule}
+
+\includeonly{chap-1/chap-1,chap-2/chap-2,chap-3/chap-3}
+
+\begin{document}
+
+% Préparation pour mini-table des matières, des figures et des tables si besoin
+%\dominitoc
+%\dominilof
+%\dominilot
+
+%
+% Atomes Users manual	
+%
+\titleEN{\hspace{-1cm}\includegraphics*[width=17cm, keepaspectratio=true, draft=\ddst]{img/overview4}\\ \bigskip \atomes\ tutorials}
+
+\author{Sébastien {\sc{Le Roux}}\quad\href{mailo:sebastien.leroux@ipcms.unistra.fr}{sebastien.leroux@ipcms.unistra.fr}}
+\address{sebastien.leroux@ipcms.unistra.fr}
+\universite{Institut de Physique et Chimie des Matériaux de Strasbourg\\
+Département des Matériaux Organiques\
+BP 43, 23 rue du Loess,\\
+F-670234 Strasbourg Cedex 2, France}
+
+\beforepreface
+
+\setcounter{page}{1}            % Je recommence la numerotation a un pour pas
+                                % decaler l'alternance droite/gauche et que
+                                % les pages impaires soient bien a droite.
+%\setcounter{tocdepth}{4}
+
+% Mise en forme TOC/TOF/LOT
+{\small \tableofcontents}
+\addcontentsline{toc}{chapter}{Contents}
+
+\afterpreface
+
+\vfill                          % Je remplis avec du rien (\vfill}
+\pagebreak                      % Je change de page.
+
+%{\small \printindex}
+
+% Intro
+\include{chap-1/chap-1}
+\include{chap-2/chap-2}
+\include{chap-3/chap-3}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Biblio %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\bibliographystyle{these}
+%\bibliography{full-biblio}
+
+% Colophon
+\colophon{This document has been prepared using the Linux operating system and Free softwares:
+\begin{tabular}{lc}
+The text editor & "\href{http://www.vim.org/}{gVim}" \\
+The GNU image manipulation program & "\href{http://www.gimp.org/}{The Gimp}" \\
+The WYSIWYG plotting tool & "\href{http://plasma-gate.weizmann.ac.il/Grace/}{Grace}" \\
+And the document preparation system & "\href{http://www.latex-project.org/}{\LaTeXe}".
+\end{tabular}}
+
+\end{document}
+

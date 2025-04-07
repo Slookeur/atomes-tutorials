@@ -1,0 +1,92 @@
+\chapter{ Getting information on selected structural features: g(r) in $g$-SiO$_2$}
+\label{tuto-1}
+
+The following example illustrates how \atomes\ can be use to retrieve information on selected structural features:
+
+\section{Open the \atomes\ $g$-SiO$_2$ project file}
+
+Open the \atomes\ project file for the system "\href{http://atomes.ipcms.fr/wp-content/uploads/2022/08/gSiO2-custom-rings.tar.bz2}{$g$-SiO$_2$ with ring statistics and custom color map, 3000 atoms}" \\[0.25cm]
+\image{14}{img/tuto-1/gSiO2-001}\\
+Note that the "\texttt{Toolboxes}" dialog is active and some results, from calculation performed previously and stored in the project file, 
+are available, including for the radial distribution function g(r). 
+
+\clearpage
+
+\section{Open the "Environment configuration" window}
+
+Go back to the 3D window of the $g$-SiO$_2$ model, 
+for clarity purpose change color map to standard chemical species: from the "\texttt{OpenGL~->~Color~Scheme(s)}" menu, or press \keystroke{a} as many times as required. 
+Then open the "\texttt{Environments configuration}" window: from the "\texttt{Chemistry}" menu or press \Ctrl+\keystroke{e}, and open the tab labelled "\texttt{King's~ring(s){\bf{[KR]}}}". \\[0.5cm]
+\begin{tabular}{cp{0.5cm}c}
+\hspace{-1cm}\image{9}{img/tuto-1/map-env} & \raisebox{2.0cm}{$\Longrightarrow$} & \image{5}{img/tuto-1/gSiO2-003}
+\end{tabular} \\[0.5cm]
+This tab provides interactors with King's ring statistics calculation results: color of the ring's polyhedra, and then options to show/hide, label/unlabel, 
+or select/unselect atom(s) involved in any ring(s) of the corresponding size.
+
+\clearpage
+
+\section{Select all atoms in ring(s) of size 6}
+
+"\texttt{Pick}" all atoms in ring(s) of size 6: atoms in the 3D window are then selected and highlighted in light blue color. \\[0.5cm]
+\image{15}{img/tuto-1/sel}
+
+\clearpage
+
+\section{Create a new model using the atom selection} 
+
+Go back to the 3D window, and mouse right click on any selected atom, then browse the contextual menu that pops up to "\texttt{Edit~as~New~Project}", 
+then select "\texttt{All~Selected~Atom(s)/Bond(s)}" \\[0.5cm]
+\begin{tabular}{cp{0.5cm}c}
+\hspace{-1cm}\image{8}{img/tuto-1/edit\_as\_new} & \raisebox{2.0cm}{$\Longrightarrow$} & \image{8}{img/tuto-1/new\_proj}
+\end{tabular}
+\\[0.5cm]
+This will create a new \atomes\ project that will immediately be inserted in the program's workspace, and the corresponding 3D window will appear. \\ 
+This new model contains all atoms involved in King's rings of size 6 selected previously in the disordered SiO$_2$ model. 
+
+\clearpage
+
+\section{Correct the periodicity of the new model} 
+
+From the main interface open the "\texttt{Edit}" menu and select "\texttt{Box~and~Periodicity}" 
+to reproduce the periodicity of the initial model describing properly the simulation box (a~$=$~b~$=$~c~$= 35.6621$~\AA, $\alpha = \beta = \gamma = 90~^{\circ}$, and be sure to use Periodic Boundary Conditions), then apply changes. \\[0.5cm]
+\image{15}{img/tuto-1/perio} \\[0.5cm]
+The new model now uses periodic boundary conditions, if required the box can be displayed in the 3D window using the corresponding menu button: "\texttt{Model~->~Box~->~Show/Hide}".
+
+\clearpage
+
+\section{Compute the g(r) for the new model}
+
+Again from the main interface open the "\texttt{Analyze}" menu, then select "\texttt{g(r)~/~G(r)}", to open the associated calculation dialog. 
+Set parameter(s) to acceptable value(s) and run the analysis. \\[0.5cm] 
+\image{15}{img/tuto-1/run-gr}
+
+\clearpage
+
+\section{Visualize the results of the calculation} 
+
+When the calculation is completed, close the dialog, and note that the content of the "\texttt{Toolboxes}" dialog 
+is updated, the results of the calculation being available:\\[0.5cm]
+\begin{tabular}{cp{0.5cm}cp{0.5cm}c}
+\hspace{-1cm}\image{5}{img/tuto-1/tb-001} & \raisebox{2.0cm}{$\Longrightarrow$} &
+\image{5}{img/tuto-1/tb-002} & \raisebox{2.0cm}{$\Longrightarrow$} &
+\image{5}{img/tuto-1/tb-003} \\
+\end{tabular}
+\begin{tabular}{cc}
+\hspace{2cm}\image{10}{img/tuto-1/gr} & \raisebox{8cm}{$\Swarrow$}
+\end{tabular}
+\\[0.5cm]
+In the "\texttt{Toolboxes}" dialog open the result of the calculation to display the g(r) of the active project, in this case the new model created from the atom selection. 
+
+\clearpage
+
+\section{Add the calculation data for the entire $g$-SiO$_2$ model}
+
+On the curve window press the mouse right click, browse the menu to "\texttt{Add~Data~Set~->~$g$SiO}$_2$\texttt{~->~g(r)~neutrons}" 
+to add the corresponding data set to the representation: \\[0.5cm]
+\begin{tabular}{cp{0.5cm}c}
+\hspace{-1cm}\jmage{6}{img/tuto-1/add\_data} & \raisebox{3.0cm}{$\Longrightarrow$} & \jmage{7}{img/tuto-1/final}
+\end{tabular}
+\\[0.5cm]
+Note that projects opened in \atomes\ share data. Therefore calculation results, from any model in the workspace and provided that the calculations have been performed, can be compared easily. 
+In this example it allows to compare the g(r) for the $g$-SiO$_2$ system with a partial contribution from the atoms involved in King's rings of size 6. \\
+Comprehensive layout options are available and presentation can be clarified, each data set customized, so that the results of the analysis are quickly publication ready.

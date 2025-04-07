@@ -1,0 +1,61 @@
+\chapter{Building a crystal, then creating and passivating a surface}
+\label{tuto-2}
+
+\section{Create an empty project to build a crystal}
+
+Create a new empty project: "\texttt{Workspace~->~Project~->~New}" or press \Ctrl+\keystroke{n}, then open the crystal builder for the new, and empty, 3D window: "\texttt{Tools~->~Edit~->~Crystal~Builder}" \\[0.5cm]
+\image{14}{img/tuto-2/002-cbuild}
+
+\clearpage
+
+\section{Build a large diamond-like structure}
+
+Adjust parameters to selected space group and corresponding settings, in this example large diamond-like crystal: Cubic, Face-centered, space group N°227 "Fd-3m (1)" \\ 
+Select the object(s) to be inserted at crystalline position(s), in this example C atom(s), note that in \atomes\ it is also possible to use molecular fragments inserted from the software library or from any project opened in the workspace. 
+If needed adjust position, and / or occupancy, then remember to select the object(s) to be actually inserted when building the crystal by clicking on "Insert". 
+Then simply click on "\texttt{Build}". \\[0.5cm]
+\image{14}{img/tuto-2/003-building}
+\\[0.5cm]
+The 3D window is populated with the newly created structure, in this example a "20$\times$20$\times$20" supercell of pure diamond. 
+
+\clearpage
+
+\section{Open the surface creation utility}
+
+To create a surface in this crystalline material, open the dedicated tool: "\texttt{Tools~->~Edit~->~Cell~->~Cut~Slab}" \\[0.5cm]
+\image{14}{img/tuto-2/004-slab}
+
+\clearpage
+
+\section{Prepare and cut a cylinder slab}
+
+Adjust the shape of the slab to "\texttt{Cylinder}", in the "\texttt{Size}" options adjust the cylinder length and radius to 80~\AA\ and 15~\AA\ respectively. 
+You can display the slab using the "\texttt{Show/Hide~slab}" interactor, also export the results of the cutting/passivating in a new project by activating the corresponding option. \\
+Check on "\texttt{Passivate surface}" and, in the option dialog that immediately opens, and as illustrated select to passivate empty C-C bonds created when cutting the slab with water molecule. \\[0.5cm]
+\image{16}{img/tuto-2/005-cutting}
+\\[0.5cm]
+Then just click on "\texttt{Cut~this~slab~now~!}" to create a new project, that will contain the new material: a C diamond cell where the atoms inside the cylinder are removed, creating a surface, and where non-bridging bonds have been passivated using H$_2$O molecules.
+
+\clearpage
+
+\section{Check the model and open the "Model Edition" dialog}
+
+Newly inserted water molecules, under selection, appear in light blue. If you rotate to model box to face right, water molecules appear perfectly aligned. 
+To create disorder open the "\texttt{Random~Move}" tab of the "\texttt{Model~Edition}" dialog: "\texttt{Tools~->~Edit~->~Atoms~->~Random~Move}"\\[0.5cm] 
+\image{15}{img/tuto-2/006-roran}
+
+\clearpage
+
+\section{Randomly rotate all water molecules to create disorder}
+
+This interface allows to search for, and move randomly, atom(s) or group of atom(s), selection target(s) appearing in the table bellow. 
+Also note that, quite conveniently, "\texttt{All~selected~atoms}" are by default targets of the action(s) to be performed. \\
+To work on water molecules set the search parameters as follow:
+\begin{itemize}
+\item "\texttt{For}": use "\texttt{Group~of~atomes:~all}" to work on group of atoms, and not atom(s) individually, and to display a single interactor for all object(s) instead of a list detailed list. 
+\item "\texttt{Filter}": use "\texttt{Partial~coordination}", to display a list of partial coordination(s) matching previously set criteria. 
+\end{itemize}
+Then selected to "\texttt{Rotate}" all "\texttt{O[H$_2$]}" coordination spheres, that is all water molecules, set a maximum Mean Square Displacement by adjusting the corresponding parameter, and if required specify how many times the process is to be repeated. \\[0.5cm]
+\image{15}{img/tuto-2/007-random}\\
+Then simply click on "\texttt{Move atom(s)}" to rotate randomly and separately each water molecule in the model.
+

@@ -1,0 +1,216 @@
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+
+\usepackage{pifont}
+% Les polices possibles (pour tout le document)
+%\usepackage[bitstream-charter]{mathdesign}
+
+%Font ps pour le pdf
+\usepackage{pslatex}
+
+%Hyperliens pour le pdf
+\usepackage[pdfauthor   = {Sébastien\ Le\ Roux},
+    pdftitle    = {atomes\ tutorials},
+    pdfsubject = {atomes\ tutorials},
+    pdfkeywords = {atomes\ tutorials\ guide\ help\ documentation},
+    pdfcreator = {Latex+DviPDF},
+    pdfproducer = {LaTeX+DviPDF},
+    pdfstartview=FitV   % Ouverture avec ajustement de l'image
+    dvips=true,         % Use hyperref with dvips
+    colorlinks=true,    % Lien hypertext en couleur
+    plainpages=false,   %
+    pagebackref=true,   % Permet d'ajouter des liens retour dans la biblio ...
+    backref=page,       % .. ces liens pointent vers les 'pages' des citations
+    hyperindex=true,    % Ajoute des liens dans l'index
+    linktocpage=true,   % Lien sur les numéros de page et non le text 
+    breaklinks=true,    % Permet le retour à la ligne dans les liens trop longs
+    urlcolor= blue,     % Couleur des liens externes
+%    linkcolor= black,   % Couleur des liens internes
+    bookmarks=true,     % Création des signets pour Acrobat
+    bookmarksopen=false % Toute l'arborescence est dépliée à l'ouverture
+]{hyperref}
+%\usepackage[pageref]{backref}
+
+%Insertion d'images
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.eps}
+
+%Dessins latex
+% Brouillon ? = afficher les images "false" ou seulement les cadres "true"
+% effet sur tout le document
+\newcommand{\ddst}{false}
+%\usepackage{picins}
+
+\usepackage{color}
+
+% Mode verbatim avancé
+\usepackage{alltt}
+
+% Système de liste/énumération
+\usepackage{pifont}
+\usepackage{enumerate}
+
+% Ecriture des mathématiques
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amscd}
+\usepackage{theorem}
+
+\usepackage{pxfonts}
+
+% tableaux
+\usepackage{hhline}
+%\usepackage{array}
+\usepackage{multirow}
+\usepackage{tabls}
+
+%% Mise en page
+\voffset         0.0cm
+\hoffset         0.0cm
+\textheight     24.0cm
+\textwidth      16.0cm
+\topmargin      -0.5cm
+\oddsidemargin   0.0cm
+\evensidemargin  0.0cm
+
+% pages en landscape dans document portrait
+\usepackage{lscape}
+
+% Aspect de pages
+\usepackage{setspace}
+%\onehalfspacing
+%\doublespacing
+%\setstretch{3}
+
+%\usepackage{fancyhdr,fancybox}
+%\fancyhead{}
+%\fancyhead[RO]{\scriptsize{\slshape\rightmark}}
+%\fancyhead[LO]{\scriptsize{\thepage}}
+%\fancyhead[RE]{\scriptsize{\thepage}}
+%\fancyhead[LE]{\scriptsize{\slshape\leftmark}}
+%\pagestyle{fancy}
+
+% Numérotation pour les sous-sous-sections
+\setcounter{secnumdepth}{3}
+% Table des matières/figures/tables par chapitre
+%\usepackage{minitoc}
+% Pour placer des notes de bas de pages dans les titres
+%\usepackage[stable]{footmisc}
+
+%Définitions de théorèmes
+\theoremstyle{plain}
+\theoremheaderfont{\scshape}
+\theorembodyfont{\normalfont\itshape}
+\newtheorem{HK}{Théorème}
+
+% Créer un environnement résumé
+\def\abstract{
+   \begin{center}
+   \begin{minipage}{12cm}
+   \begin{center}{\bf Résumé}\end{center}\par\small}
+\def\endabstract{\par\end{minipage}\end{center}\vspace{1cm}}
+
+% Bilblio:
+\input{bibsymb}
+%\usepackage{chapterbib}
+
+%\usepackage[square,comma,sort&compress]{natbib}
+%\usepackage{hypernat}
+
+% Algo XML
+\usepackage{listings}
+
+% Texte souligné
+\usepackage[normalem]{ulem}
+
+% Mise en forme des légendes
+\usepackage[hang]{caption2}
+%\usepackage[hang]{caption}
+\renewcommand{\captionfont}{\it}
+\renewcommand{\captionlabelfont}{\bf}
+\renewcommand{\captionlabeldelim}{$\quad$}
+
+%\usepackage[format=plain,labelfont=bf,up,textfont=it,up]{caption}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\green}[1]{\textcolor{green}{#1}}
+\newcommand{\violet}[1]{\textcolor{violet}{#1}}
+\newcommand{\pink}[1]{\textcolor{pink}{#1}}
+\newcommand{\aob}[1]{"{\texttt{#1}}"}
+
+\definecolor{lg}{rgb}{0.95,0.95,0.95}
+
+\newcounter{htmlkey}
+\setcounter{htmlkey}{2}
+\usepackage{keystroke}
+\newcommand{\sclxml}{\input{sclxml}}
+\newcommand{\sglxml}{\input{sglxml}}
+
+\newcommand{\mbf}[1]{<#1>}
+\newcommand{\key}[1]{\red{#1}}
+
+\newcommand{\isaacs}{I.S.A.A.C.S.}
+\newcommand{\ISAACS}{Interactive Structure Analysis of Amorphous and Crystalline Systems}
+\newcommand{\atomes}{{\em{\bf{atomes}}}}
+\newcommand{\activp}{{\em{\bf{active}}}}
+\newcommand{\rpc}{$R_C(n)$}
+\newcommand{\rpn}{$R_N(n)$}
+\newcommand{\pnr}{$P_N(n)$}
+\newcommand{\pnrmin}{$P_{N_{\text{min}}}(n)$}
+\newcommand{\pnrmax}{$P_{N_{\text{max}}}(n)$}
+\newcommand{\pmin}{$P_{\text{min}}(n)$}
+\newcommand{\pmax}{$P_{\text{max}}(n)$}
+\newcommand{\smin}{$s_{min}$}
+\newcommand{\smax}{$s_{max}$}
+
+\newcommand{\ges}{GeS$_2$}
+\newcommand{\sio}{SiO$_2$}
+\newcommand{\nn}{rings with $n$ nodes}
+\newcommand{\con}{connectivity}
+\newcommand{\conp}{connectivity profile}
+\newcommand{\rstat}{ring statistics}
+
+\newcommand{\dlpoly}{\href{https://www.scd.stfc.ac.uk/Pages/DL\_POLY.aspx}{DL-POLY}}
+\newcommand{\lammps}{\href{https://lammps.sandia.gov/}{LAMMPS}}
+\newcommand{\cpmd}{\href{http://www.cpmd.org}{CPMD}}
+\newcommand{\cptk}{\href{http://cp2k.berlios.de}{CP2K}}
+
+\newcommand{\atomesweb}{https://atomes.ipcms.fr}
+
+\renewcommand{\figurename}{Figure}
+\renewcommand{\tablename}{Table}
+\newcommand{\laf}{\\}
+\newcommand{\image}[2]{\includegraphics*[width=#1cm, keepaspectratio=true, draft=\ddst]{#2}}
+\newcommand{\jmage}[2]{\includegraphics*[height=#1cm, keepaspectratio=true, draft=\ddst]{#2}}
+
+\newcommand{\myfigure}[5]{\begin{figure}[!#1]{\hypertarget{#2}{\begin{center}{#3\caption[#4]{#5}\label{#2}}\end{center}}}\end{figure}}
+\newcommand{\mytable}[5]{\begin{table}[!#1]{\begin{center}{#3\caption[#4]{#5}\label{#2}}\end{center}}\end{table}}
+
+\newsavebox{\cobox}
+\def\script{
+  \noindent \laf \laf
+  \begin{lrbox}
+  \cobox
+  \begin{minipage}[l]{16cm}
+  \begin{alltt}}
+\def\endscript{
+  \end{alltt}
+  \end{minipage}
+  \end{lrbox}
+  \colorbox{lg}{\usebox{\cobox}}
+  \vspace{0.125cm}\par\noindent}
+
+\def\scri#1{
+  \noindent \laf \laf
+  \begin{lrbox}
+  \cobox
+  \begin{minipage}[l]{#1cm}
+  \begin{alltt}}
+\def\endscri{
+  \end{alltt}
+  \end{minipage}
+  \end{lrbox}
+  \colorbox{lg}{\usebox{\cobox}}
+  \vspace{0.25cm}\par\noindent}
+
