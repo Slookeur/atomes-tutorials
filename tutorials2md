@@ -13,6 +13,7 @@ FIGREF=$SITE_HOME/frefs
 FLOG=$SITE_HOME/flog
 TABREF=$SITE_HOME/trefs
 TLOG=$SITE_HOME/tlog
+DATE=`date +%F" "%T`
 
 if [ "$1" == "local" ]; then
   HROOT="/"
@@ -29,8 +30,8 @@ echo "---
 title: atomes&#58; tutorials
 # nav_order: 0
 nav_exclude: true
-date: 2025-04-07
----
+date: "$DATE > $SITE_HOME/index.md
+echo "---
 
 # <img width=\"50px\" height=\"50px\" style=\"position:relative; bottom:-15px\" src=\"/atomes-tuto/assets/images/atomes.svg\" /> **atomes: tutorials**
 
@@ -47,7 +48,7 @@ It is developped by [Dr. Sébastien Le Roux][slr], research engineer for the [CN
   <a href=\"https://www.cnrs.fr/\"><img width=\"100\" src=\"https://www.cnrs.fr/themes/custom/cnrs/logo.svg\" alt=\"CNRS logo\" align=\"center\"></a>
 </p>
 
-[Dr. Sébastien Le Roux][slr] works at the "Institut de Physique et Chimie des Matériaux de Strasbourg" [IPCMS][ipcms]
+[Dr. Sébastien Le Roux][slr] works at the Institut de Physique et Chimie des Matériaux de Strasbourg [IPCMS][ipcms]
 
 <p align=\"center\">
   <a href=\"https://www.ipcms.fr/\"><img width=\"100\" src=\"https://www.ipcms.fr/uploads/2020/09/cropped-dessin_logo_IPCMS_couleur_vectoriel_r%C3%A9%C3%A9quilibr%C3%A9-2.png\" alt=\"IPCMS logo\" align=\"center\"></a>
@@ -77,7 +78,7 @@ This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.o
 [jekyll]:https://jekyllrb.com/
 [atomes]:https://atomes.ipcms.fr/
 [atomes-tuto]:"$HROOT"atomes-tutorials.pdf
-[atomes-doc]:/atomes-doc" > $SITE_HOME/index.md
+[atomes-doc]:/atomes-doc" >> $SITE_HOME/index.md
 }
 
 function add_katex {
@@ -165,7 +166,7 @@ function print_sort {
     echo "parent: "$parent >> $1/$2.md  
   fi
   echo "nav_order: "$3 >> $1/$2.md
-  echo "date: "`date +%F` >> $1/$2.md
+  echo "date: "$DATE >> $1/$2.md
   echo "maths: 1"  >> $1/$2.md
   echo "---" >> $1/$2.md
   echo "" >> $1/$2.md
@@ -181,7 +182,7 @@ function print_ssort {
     echo "parent: "$parent >> $1/$2.md  
   fi
   echo "nav_order: "$3 >> $1/$2.md
-  echo "date: "`date +%F` >> $1/$2.md
+  echo "date: "$DATE >> $1/$2.md
   echo "maths: 1"  >> $1/$2.md
   echo "---" >> $1/$2.md
   echo "" >> $1/$2.md
