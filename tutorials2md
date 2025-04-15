@@ -423,6 +423,8 @@ function prepare_html_file {
   prepare_figure_captions $1 $2
   prepare_table_captions $1 $2
   prepare_all_ref $1
+  sed 's/\\(\_2\\)/<sub>2<\/sub>/g' $1 > tmp
+  mv tmp $1
 }
 
 function prepare_subsections {
@@ -916,6 +918,7 @@ function set_up_dir
   ln -s ../tutorials/bibsymb.tex .
   ln -s ../tutorials/full-biblio.bib .
   ln -s ../tutorials/chap-? .
+  cp ../tutorials/fig-web.* .
 
   # Need to modify latex preambule, and pango do not understand latex commands
   sed 's/fig-data/fig-web/1' ../tutorials/preambule.tex > preambule.tex
